@@ -22,15 +22,14 @@ public class SpeedDataService {
 
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final SpeedDataRepository dataRepository;
+    private final FileUploadService fileUploadService;
 
-    public SpeedDataService(SpeedDataRepository dataRepository) {
+    public SpeedDataService(SpeedDataRepository dataRepository, FileUploadService fileUploadService) {
         this.dataRepository = dataRepository;
+        this.fileUploadService = fileUploadService;
     }
 
-    public List<SpeedData> getData(String from, String to, String speed, String pageNr) throws Exception {
-        if (dataRepository.checkIfEmpty() == 0) {
-            saveData();
-        }
+    public List<SpeedData> getData(String from, String to, String speed, String pageNr) {
         Pageable page = PageRequest.of(Integer.parseInt(pageNr), 20);
         return dataRepository.filterData(
                 !Objects.equals(from, "") ? LocalDateTime.parse(from, formatter) : null,
@@ -43,33 +42,47 @@ public class SpeedDataService {
         LocalDateTime to = LocalDate.parse(date, formatter).plusDays(1).atStartOfDay();
         List<SpeedData> dataList = dataRepository.getSpecificDayData(from, to);
 
-        Map<Integer, Long> dataMap = dataList
+        Map<Integer, List<SpeedData>> groupedByHours = dataList
                 .stream()
                 .collect(Collectors
                         .groupingBy(data -> data.getTime()
-                                .getHour()))
+                                .getHour()));
+
+        Map<Integer, Double> mapWithCalculatedAverageSpeed = groupedByHours.entrySet()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue()
+                        .stream()
+                        .mapToInt(SpeedData::getSpeed)
+                        .average()
+                        .orElse(0)));
+
+        return mapWithCalculatedAverageSpeed
                 .entrySet()
                 .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> Math
-                        .round(entry.getValue()
-                                .stream()
-                                .mapToInt(SpeedData::getSpeed)
-                                .average()
-                                .orElse(0))));
-        return dataMap.entrySet().stream().map(e -> new AverageSpeed(e.getKey(), e.getValue())).toList();
+                .map(e -> new AverageSpeed(e.getKey(), Math.round(e.getValue())))
+                .toList();
     }
 
-    public void saveData() throws Exception {
-        Path path = Path.of(ClassLoader.getSystemResource("speed.txt").toURI());
-        List<SpeedData> dataList = new ArrayList<>();
-        try (Reader reader = Files.newBufferedReader(path)) {
-            try (CSVReader csvReader = new CSVReader(reader, '\t')) {
-                String[] line;
-                while ((line = csvReader.readNext()) != null) {
-                    dataList.add(new SpeedData(LocalDateTime.parse(line[0], formatter), Integer.parseInt(line[1]), line[2]));
+    public void saveData(String filePath) {
+        dataRepository.deleteAll();
+        if (dataRepository.checkIfEmpty() == 0 && !Objects.equals(filePath, null)) {
+            Path path = Path.of(filePath);
+            List<SpeedData> dataList = new ArrayList<>();
+            try (Reader reader = Files.newBufferedReader(path)) {
+                try (CSVReader csvReader = new CSVReader(reader, '\t')) {
+                    String[] line;
+                    while ((line = csvReader.readNext()) != null) {
+                        dataList.add(
+                                new SpeedData(LocalDateTime.parse(line[0], formatter),
+                                        Integer.parseInt(line[1]),
+                                        line[2]));
+                    }
+                    dataRepository.saveAll(dataList);
                 }
-                dataRepository.saveAll(dataList);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
             }
+            fileUploadService.deleteFiles();
         }
     }
 }
