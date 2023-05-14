@@ -1,35 +1,64 @@
 @import './base.css';
+@import 'primeicons/primeicons.css';
 
 #app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-
-  font-weight: normal;
+    font-weight: normal;
 }
 
 a,
 .green {
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
+    text-decoration: none;
+    transition: 0.4s;
+}
+
+a:hover {
+    background-color: rgb(137, 207, 240, 0.05) !important;
+}
+
+.p-button {
+    color: rgb(69, 104, 121) !important;
+    background: rgb(137, 207, 240, 0.3) !important;
+    border-color: rgb(119, 179, 208) !important;
+}
+
+.p-button:enabled:active, .p-button:hover, .p-button:focus {
+    color: rgb(69, 104, 121) !important;
+    background: rgb(137, 207, 240, 0.6) !important;
+    border-color: rgb(119, 179, 208) !important;
+    box-shadow: none !important;
+}
+
+.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+    border-color: rgb(119, 179, 208) !important;
+    color: rgb(119, 179, 208) !important;
+}
+
+.p-accordion .p-accordion-header:not(.p-disabled).p-highlight .p-accordion-header-link:focus,
+.p-accordion .p-accordion-header:not(.p-highlight):not(.p-disabled):hover .p-accordion-header-link:focus,
+.p-accordion .p-accordion-header:not(.p-disabled) .p-accordion-header-link:focus {
+    box-shadow: none !important;
+}
+
+.p-inputtext:enabled:focus, .p-inputtext:enabled:hover {
+    box-shadow: none !important;
+    border-color: rgb(119, 179, 208) !important;
 }
 
 @media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
+    a:hover {
+        background-color: hsla(160, 100%, 37%, 0.2);
+    }
 }
 
 @media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
+    body {
+        display: flex;
+        justify-content: center;
+    }
 
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
-  }
+    #app {
+        margin: 1rem 0;
+        display: flex;
+        padding: 0 2rem;
+    }
 }

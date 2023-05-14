@@ -6,6 +6,7 @@ import com.example.backend.repository.SpeedDataRepository;
 import com.opencsv.CSVReader;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.io.Reader;
@@ -30,7 +31,8 @@ public class SpeedDataService {
     }
 
     public List<SpeedData> getData(String from, String to, String speed, String pageNr) {
-        Pageable page = PageRequest.of(Integer.parseInt(pageNr), 20);
+        Pageable page = PageRequest.of(Integer.parseInt(pageNr), 20, Sort.by("time"));
+        System.out.println(to);
         return dataRepository.filterData(
                 !Objects.equals(from, "") ? LocalDateTime.parse(from, formatter) : null,
                 !Objects.equals(to, "") ? LocalDateTime.parse(to, formatter) : null,
@@ -56,11 +58,12 @@ public class SpeedDataService {
                         .average()
                         .orElse(0)));
 
-        return mapWithCalculatedAverageSpeed
+        List<AverageSpeed> averageSpeedList = mapWithCalculatedAverageSpeed
                 .entrySet()
                 .stream()
                 .map(e -> new AverageSpeed(e.getKey(), Math.round(e.getValue())))
                 .toList();
+        return averageSpeedList.stream().sorted(Comparator.comparingInt(AverageSpeed::getHour)).toList();
     }
 
     public void saveData(String filePath) {

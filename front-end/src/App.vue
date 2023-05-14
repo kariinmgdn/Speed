@@ -1,85 +1,55 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+import {RouterLink} from 'vue-router'
+import TabPanel from "primevue/tabpanel";
+import TabView from "primevue/tabview";
+import AverageSpeedView from "@/views/AverageSpeedView.vue";
+import SpeedTableView from "@/views/SpeedTableView.vue";
+import {onMounted, ref} from "vue";
+import router from "@/router";
+
+const path = location.pathname;
+const active = ref();
+
+onMounted(() => {
+    if (path === "/" || path === "/average") {
+        active.value = path === "/" ? 0 : 1;
+    } else {
+        router.push("/");
+    }
+})
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
+    <div style="display: block">
+        <h1 style="display: flex;justify-content: center; margin-bottom: 2rem">Ātruma rādītāji</h1>
+        <div class="p-card">
+            <TabView :active-index="active" class="panel">
+                <TabPanel>
+                    <template #header>
+                        <RouterLink style="padding: 1rem; color: #181818" to="/"> Tabula</RouterLink>
+                    </template>
+                    <div>
+                        <SpeedTableView/>
+                    </div>
+                </TabPanel>
+                <TabPanel>
+                    <template #header>
+                        <RouterLink style="padding: 1rem; color: #181818" to="/average"> Vidējais atrums</RouterLink>
+                    </template>
+                    <AverageSpeedView/>
+                </TabPanel>
+            </TabView>
+        </div>
     </div>
-  </header>
-
-  <RouterView />
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
-}
+<style scoped lang="scss">
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
+.panel:deep {
+  .p-tabview-nav-container {
+    .p-tabview-nav-link {
+      padding: 0;
+    }
   }
 }
 </style>
