@@ -1,6 +1,6 @@
 package com.example.backend.service;
 
-import com.example.backend.domain.AverageSpeed;
+import com.example.backend.dto.AverageSpeed;
 import com.example.backend.domain.SpeedData;
 import com.example.backend.repository.SpeedDataRepository;
 import com.opencsv.CSVReader;

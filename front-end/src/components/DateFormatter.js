@@ -1,4 +1,7 @@
 export const formatDate = (date) => {
+    if (!date) {
+        return "";
+    }
     date = new Date(date);
     const month = formatNumbers(date.getMonth() + 1);
     return `${date.getFullYear()}-${month}-${formatNumbers(date.getDate())} `

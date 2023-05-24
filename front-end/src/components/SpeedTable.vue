@@ -7,9 +7,11 @@ import Accordion from 'primevue/accordion';
 import AccordionTab from 'primevue/accordiontab';
 import Calendar from 'primevue/calendar';
 import InputNumber from 'primevue/inputnumber';
-import {formatDate} from "./DateFormatter";
 import {useSpeedStore} from "@/stores/SpeedStore";
+import {useToast} from "primevue/usetoast";
+import Toast from 'primevue/toast';
 
+const toast = useToast();
 const speedStore = useSpeedStore();
 
 const data = ref([]);
@@ -25,15 +27,28 @@ computed(() => dateFrom);
 computed(() => dateTo);
 
 const loadData = async () => {
-    const speedValue = speed.value ? speed.value : "";
-    const from = dateFrom.value ? formatDate(dateFrom.value) : "";
-    const to = dateTo.value ? formatDate(dateTo.value) : "";
-    await speedStore.getSpeedData(from, to, speedValue);
+    speedStore.speed = speed.value;
+    speedStore.from = dateFrom.value;
+    speedStore.to = dateTo.value;
+
+    await speedStore.getSpeedData();
     const allData = speedStore.speedData;
+    if (speedStore.pageIndex !== 0 && allData.length === 0) {
+        speedStore.pageIndex--;
+        await loadData();
+        isMax.value = true;
+        show();
+    } else {
+        data.value = allData;
+    }
     isMax.value = allData.length !== 20;
-    data.value = allData;
     loading.value = false;
 }
+
+const show = () => {
+    toast.add({severity: 'info', summary: 'Info', detail: 'Tika ielādēti visi dati', life: 3000});
+
+};
 
 watch(speedStore, (value, oldValue) => {
     data.value = value.speedData;
@@ -41,6 +56,9 @@ watch(speedStore, (value, oldValue) => {
         loading.value = true;
         loadData();
     }
+    dateFrom.value = value.from;
+    dateTo.value = value.to;
+    speed.value = value.speed;
 })
 
 const onRightClick = () => {
@@ -78,13 +96,14 @@ onMounted(() => {
 </script>
 
 <template>
+    <Toast/>
     <Accordion>
         <AccordionTab header="Filtrēt datus">
             <div class="filter-container">
                 <div class="label-text">Laiks no</div>
                 <Calendar v-model="dateFrom" showIcon showTime hourFormat="24"/>
 
-                <div class="label-text">Laiks lídz</div>
+                <div class="label-text">Laiks līdz</div>
                 <Calendar v-model="dateTo" showIcon showTime hourFormat="24"/>
 
                 <div class="label-text">Ātrums (km/h)</div>
@@ -96,7 +115,7 @@ onMounted(() => {
             </div>
         </AccordionTab>
     </Accordion>
-    <DataTable stripedRows :loading="loading" scrollable scrollHeight="400px" :value="data"
+    <DataTable stripedRows :loading="loading" scrollable scrollHeight="350px" :value="data"
                tableStyle="min-width: 50rem">
         <Column field="time" header="Laiks" style="width: 50%"></Column>
         <Column field="speed" header="Ātrums km/h" style="width: 25%"></Column>

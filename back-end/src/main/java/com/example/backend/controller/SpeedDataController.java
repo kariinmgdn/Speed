@@ -1,6 +1,6 @@
 package com.example.backend.controller;
 
-import com.example.backend.domain.AverageSpeed;
+import com.example.backend.dto.AverageSpeed;
 import com.example.backend.domain.SpeedData;
 import com.example.backend.service.FileUploadService;
 import com.example.backend.service.SpeedDataService;

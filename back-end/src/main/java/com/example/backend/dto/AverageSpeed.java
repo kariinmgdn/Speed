@@ -1,4 +1,4 @@
-package com.example.backend.domain;
+package com.example.backend.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

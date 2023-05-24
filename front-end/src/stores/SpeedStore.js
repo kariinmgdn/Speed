@@ -1,6 +1,7 @@
 import {defineStore} from "pinia";
 import axios from "axios";
 import {ref} from "vue";
+import {formatDate} from "@/components/DateFormatter";
 
 export const useSpeedStore = defineStore({
     id: "speedStore",
@@ -8,12 +9,18 @@ export const useSpeedStore = defineStore({
         speedData: ref([]),
         averageSpeedData: ref([]),
         pageIndex: ref(0),
+        from: ref(null),
+        to: ref(null),
+        speed: ref(null),
     }),
     actions: {
-        async getSpeedData(from, to, speed) {
+        async getSpeedData() {
             await axios.get("/api/speed", {
                 params: {
-                    from: from, to: to, speed: speed, page: this.pageIndex
+                    from: formatDate(this.from),
+                    to: formatDate(this.to),
+                    speed: this.speed ? this.speed : "",
+                    page: this.pageIndex
                 }
             }).then((response) => {
                 this.speedData = response.data;
